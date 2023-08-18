@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Container, Typography, Card, CardContent, CardMedia, Link, Divider, Grid, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import axios from 'axios';
 import OpenAI from 'openai';
+import { toast } from "react-toastify";
+
 import http from '../utils/Api';
 const newsBoxStyle = {
   border: '1px solid #ccc',
@@ -11,6 +13,8 @@ const newsBoxStyle = {
 };
 
 const News = () => {
+    toast.configure();
+
     const [news, setNews] = useState([]);
     const [selectedArticle, setSelectedArticle] = useState(null);
     const [summary, setSummary] = useState('');
@@ -20,6 +24,11 @@ const News = () => {
       fetchNews();
     }, []);
   
+    const showToast = (message, type = "success") => {
+        toast[type](message, {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      };
     const fetchNews = async () => {
       try {
         const apiKey = 'E0CClZDL2xb4vE7Wi3ZUY6zdjTs9yNGG';
@@ -29,10 +38,13 @@ const News = () => {
           setNews(response.data.response.docs.slice(0, 20));
         }
       } catch (error) {
+        showToast(error, "error");
+
         console.error('Error fetching news:', error);
       }
     };
   
+
     const handleSummarizeClick = async (article) => {
       setSelectedArticle(article);
       setDialogOpen(true);
@@ -52,6 +64,7 @@ const News = () => {
           setSummary(response.choices[0].text);
         }
       } catch (error) {
+        
         console.error('Error summarizing article:', error);
       }
     };
