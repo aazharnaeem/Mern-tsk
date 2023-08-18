@@ -1,0 +1,5 @@
+.completed-task .MuiDataGrid-cell {
+    text-decoration: line-through;
+    color: red;
+  }
+  

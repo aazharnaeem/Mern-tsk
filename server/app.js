@@ -20,7 +20,7 @@ app.use(morgan("combined"));
 
 
 //ROUTER
-app.use('/auth', auth);
+app.use('/api/auth', auth);
 app.use('/api/subscription',subs)
 
 

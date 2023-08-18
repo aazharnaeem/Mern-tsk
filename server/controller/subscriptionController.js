@@ -1,9 +1,15 @@
+const { user } = require("../model");
+
 const stripe = require("stripe")(process.env.stripeSecretKey);
 
 //create user subscriptions
 exports.createStripeSession = async (req, res, next) => {
     try {
-        const { userStripeId, priceId } = req.body;
+        const { userId, priceId } = req.body;
+        const exUser = await user.findById(userId);
+        if (!exUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
             payment_method_types: ["card"],
@@ -17,8 +23,8 @@ exports.createStripeSession = async (req, res, next) => {
             subscription_data: {
                 trial_period_days: 5,
             },
-            customer: userStripeId,
-            success_url: "http://localhost:3000/PaymentSucess",
+            customer: exUser.stripeCustomerId,
+            success_url: "http://localhost:3000/home",
             cancel_url: "http://localhost:3000/PaymentError",
         });
         return res.status(200).json({ sucess:true,session});
@@ -48,14 +54,18 @@ exports.cancelSubscription = async (req, res) => {
 //get user subscriptions
 exports.getUserSubscriptions = async (req, res) => {
     try {
-        const { userStripeId } = req.body;
+        const { userId } = req.params;
+        const exUser = await user.findById(userId);
+        if (!exUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
         const subscriptions = await stripe.subscriptions.list({
-            customer: userStripeId,
+            customer: exUser.stripeCustomerId, // Assuming userStripeId is the correct field
             limit: 10,
         });
 
-        return res.status(200).json({ sucess:true,subscriptions});
-
+        return res.status(200).json({ success: true, subscriptions });
     } catch (err) {
         res.status(500).json({ sucess:false, err})
     }
@@ -91,7 +101,7 @@ exports.getProducts = async (req, res) => {
                             currency: prices[j].currency,
                             nickname: prices[j].nickname,
                             product: prices[j].product,
-                            unit_amount: prices[j].unit_amount / 100
+                            unit_amount: prices[j].unit_amount
                         }
 
                     })
