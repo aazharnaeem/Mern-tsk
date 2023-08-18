@@ -4,6 +4,7 @@ import http from "../utils/Api";
 import { AppAppBar } from "../view";
 import jwt_decode from "jwt-decode";
 import withRoot from "../module/withRoot";
+import News from "./news";
 
 const Home = () => {
   const token = localStorage.getItem("accessToken");
@@ -37,6 +38,7 @@ const Home = () => {
   return (
     <div>
       <AppAppBar />
+      <News />
     </div>
   );
 };
